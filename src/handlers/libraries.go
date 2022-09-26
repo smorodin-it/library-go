@@ -25,7 +25,7 @@ func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func RetrieveLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
-	id := ctx.Params("libraryId")
+	id := ctx.Params(constants.LibraryIdField)
 	library := domains.Library{}
 
 	sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.LibraryTable)
@@ -62,7 +62,7 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
-	id := ctx.Params("libraryId")
+	id := ctx.Params(constants.LibraryIdField)
 
 	form := new(forms.LibraryAddEditForm)
 
@@ -83,6 +83,22 @@ func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 	sql := fmt.Sprintf("update %s set name=$1, address=$2, updated_at=$3 where id=$4", constants.LibraryTable)
 
 	_, err := db.Query(sql, model.Name, model.Address, model.UpdatedAt, id)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return ctx.Status(http.StatusOK).JSON(struct {
+		Status bool `json:"status"`
+	}{
+		Status: true,
+	})
+}
+
+func ToggleLibraryActive(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
+	id := ctx.Params(constants.LibraryIdField)
+
+	sql := fmt.Sprintf("update %s set active=$1, updated_at=$2 where id=$3", constants.LibraryTable)
+	_, err := db.Query(sql, active, time.Now(), id)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
