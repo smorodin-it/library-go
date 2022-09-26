@@ -7,7 +7,6 @@ import (
 	"library/src/constants"
 	"library/src/domains"
 	"library/src/utils"
-	"log"
 	"net/http"
 )
 
@@ -48,11 +47,10 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	sql := fmt.Sprintf("INSERT INTO %s (id, name, address) VALUES ($1, $2, $3)", constants.LibraryTable)
 
-	res, err := db.Query(sql, model.Id, model.Name, model.Address)
+	_, err := db.Query(sql, model.Id, model.Name, model.Address)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
-	log.Println(res)
 
 	return ctx.Status(http.StatusCreated).JSON(model)
 }
