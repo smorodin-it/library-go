@@ -53,7 +53,7 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	model.Id = utils.GenerateUUID()
 	model.Name = form.Name
-	model.Address = form.Address
+	model.Address = *form.Address
 	model.UpdatedAt = time.Now()
 
 	sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
@@ -86,7 +86,7 @@ func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 	model := new(domains.Library)
 
 	model.Name = form.Name
-	model.Address = form.Address
+	model.Address = *form.Address
 	model.UpdatedAt = time.Now()
 
 	sql := fmt.Sprintf("update %s set name=$1, address=$2, updated_at=$3 where id=$4", constants.LibraryTable)
@@ -129,7 +129,7 @@ func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
 	for _, l := range libraries {
 		form := forms.LibraryAddEditForm{
 			Name:    l.Name,
-			Address: l.Address,
+			Address: &l.Address,
 		}
 		if err := form.Validate(); err != nil {
 			return ctx.Status(http.StatusBadRequest).SendString(err.Error())
@@ -139,7 +139,7 @@ func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 		model.Id = utils.GenerateUUID()
 		model.Name = form.Name
-		model.Address = form.Address
+		model.Address = *form.Address
 
 		sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
 		_, err := db.Query(sql, model.Id, model.Name, model.Address)
