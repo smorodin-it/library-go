@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-type DbConfig struct {
-	Host     string
-	UserName string
-	Password string
-	DbName   string
-}
+//type DbConfig struct {
+//	Host     string
+//	UserName string
+//	Password string
+//	DbName   string
+//}
 
 func main() {
 	//err := godotenv.Load()
@@ -46,13 +46,30 @@ func main() {
 		"/libraries",
 		func(ctx *fiber.Ctx) error {
 			var libraries []domains.Library
-			err := db.Select(&libraries, fmt.Sprintf("SELECT * FROM %s", constants.LibraryTable))
+			sql := fmt.Sprintf("SELECT * FROM %s", constants.LibraryTable)
+
+			err := db.Select(&libraries, sql)
 			if err != nil {
 				return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 			}
+
 			return ctx.Status(http.StatusOK).JSON(libraries)
 		},
 	)
+
+	app.Get("/library/:libraryId", func(ctx *fiber.Ctx) error {
+		id := ctx.Params("libraryId")
+		library := domains.Library{}
+
+		sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.LibraryTable)
+		err := db.Get(&library, sql, id)
+		if err != nil {
+			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+		}
+
+		return ctx.Status(http.StatusOK).JSON(library)
+
+	})
 
 	log.Fatal(app.Listen("localhost:3000"))
 }
