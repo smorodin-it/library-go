@@ -118,3 +118,39 @@ func ToggleLibraryActive(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
 		Status: true,
 	})
 }
+
+func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
+	var libraries []domains.Library
+
+	if err := ctx.BodyParser(&libraries); err != nil {
+		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	for _, l := range libraries {
+		form := forms.LibraryAddEditForm{
+			Name:    l.Name,
+			Address: l.Address,
+		}
+		if err := form.Validate(); err != nil {
+			return ctx.Status(http.StatusBadRequest).SendString(err.Error())
+		}
+
+		model := new(domains.Library)
+
+		model.Id = utils.GenerateUUID()
+		model.Name = form.Name
+		model.Address = form.Address
+
+		sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
+		_, err := db.Query(sql, model.Id, model.Name, model.Address)
+		if err != nil {
+			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+		}
+	}
+
+	return ctx.Status(http.StatusOK).JSON(struct {
+		Status bool `json:"status"`
+	}{
+		Status: true,
+	})
+}

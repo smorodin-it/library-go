@@ -34,4 +34,8 @@ func ConnectRouter(app fiber.Router, db sqlx.DB) {
 	app.Patch(fmt.Sprintf("/library/deactivate/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
 		return ToggleLibraryActive(ctx, &db, false)
 	})
+
+	app.Post("/libraries/batch", func(ctx *fiber.Ctx) error {
+		return CreateLibrariesInBatch(ctx, &db)
+	})
 }
