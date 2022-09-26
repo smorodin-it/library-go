@@ -5,10 +5,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"library/src/constants"
-	"library/src/domains"
+	"library/src/handlers"
 	"log"
-	"net/http"
 )
 
 //type DbConfig struct {
@@ -34,7 +32,7 @@ func main() {
 
 	db, err := sqlx.Connect("postgres",
 		//fmt.Sprintf("host=%s user=%s password=%s dbname=%s", dbConfig.Host, dbConfig.UserName, dbConfig.Password, dbConfig.DbName))
-		fmt.Sprintf("host=localhost user=library password=library dbname=library sslmode=disable"))
+		fmt.Sprintf("host=127.0.0.1 user=library password=library dbname=library sslmode=disable"))
 
 	if err != nil {
 		log.Fatal(err)
@@ -42,34 +40,11 @@ func main() {
 
 	app := fiber.New()
 
-	app.Get(
-		"/libraries",
-		func(ctx *fiber.Ctx) error {
-			var libraries []domains.Library
-			sql := fmt.Sprintf("SELECT * FROM %s", constants.LibraryTable)
+	api := app.Group("/api")
 
-			err := db.Select(&libraries, sql)
-			if err != nil {
-				return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
-			}
+	v1 := api.Group("/v1")
 
-			return ctx.Status(http.StatusOK).JSON(libraries)
-		},
-	)
-
-	app.Get("/library/:libraryId", func(ctx *fiber.Ctx) error {
-		id := ctx.Params("libraryId")
-		library := domains.Library{}
-
-		sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.LibraryTable)
-		err := db.Get(&library, sql, id)
-		if err != nil {
-			return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
-		}
-
-		return ctx.Status(http.StatusOK).JSON(library)
-
-	})
+	handlers.ConnectRouter(v1, *db)
 
 	log.Fatal(app.Listen("localhost:3000"))
 }
