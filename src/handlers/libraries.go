@@ -6,8 +6,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	"library/src/constants"
 	"library/src/domains"
+	"library/src/forms"
 	"library/src/utils"
 	"net/http"
+	"time"
 )
 
 func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
@@ -52,5 +54,42 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(model)
+	return ctx.Status(http.StatusCreated).JSON(struct {
+		Id string `json:"id"`
+	}{
+		Id: model.Id,
+	})
+}
+
+func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+	id := ctx.Params("libraryId")
+
+	form := new(forms.LibraryAddEditForm)
+
+	if err := ctx.BodyParser(form); err != nil {
+		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	if err := form.Validate(); err != nil {
+		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	model := new(domains.Library)
+
+	model.Name = form.Name
+	model.Address = form.Address
+	model.UpdatedAt = time.Now()
+
+	sql := fmt.Sprintf("update %s set name=$1, address=$2, updated_at=$3 where id=$4", constants.LibraryTable)
+
+	_, err := db.Query(sql, model.Name, model.Address, model.UpdatedAt, id)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return ctx.Status(http.StatusOK).JSON(struct {
+		Status bool `json:"status"`
+	}{
+		Status: true,
+	})
 }

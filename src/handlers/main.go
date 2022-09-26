@@ -20,4 +20,8 @@ func ConnectRouter(app fiber.Router, db sqlx.DB) {
 	app.Post("/library", func(ctx *fiber.Ctx) error {
 		return CreateLibrary(ctx, &db)
 	})
+
+	app.Put("/library/:libraryId", func(ctx *fiber.Ctx) error {
+		return UpdateLibrary(ctx, &db)
+	})
 }
