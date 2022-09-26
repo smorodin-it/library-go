@@ -6,8 +6,8 @@ import (
 )
 
 type LibraryAddEditForm struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
+	Name    string  `json:"name"`
+	Address *string `json:"address"`
 }
 
 func (f *LibraryAddEditForm) Validate() error {
@@ -17,7 +17,7 @@ func (f *LibraryAddEditForm) Validate() error {
 	if utf8.RuneCountInString(f.Name) > 255 {
 		return errors.New("field max length 255 chars")
 	}
-	if utf8.RuneCountInString(f.Address) > 2000 {
+	if utf8.RuneCountInString(*f.Address) > 2000 {
 		return errors.New("field max length 2000 chars")
 	}
 	return nil
