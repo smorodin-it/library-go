@@ -14,7 +14,7 @@ import (
 
 func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
 	var libraries []domains.Library
-	sql := fmt.Sprintf("SELECT * FROM %s", constants.LibraryTable)
+	sql := fmt.Sprintf("select * from %s", constants.LibraryTable)
 
 	err := db.Select(&libraries, sql)
 	if err != nil {
@@ -39,22 +39,31 @@ func RetrieveLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
-	model := new(domains.Library)
+	form := new(forms.LibraryAddEditForm)
 
-	if err := ctx.BodyParser(model); err != nil {
+	if err := ctx.BodyParser(form); err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model.Id = utils.GenerateUUID()
+	if err := form.Validate(); err != nil {
+		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
+	}
 
-	sql := fmt.Sprintf("INSERT INTO %s (id, name, address) VALUES ($1, $2, $3)", constants.LibraryTable)
+	model := new(domains.Library)
+
+	model.Id = utils.GenerateUUID()
+	model.Name = form.Name
+	model.Address = form.Address
+	model.UpdatedAt = time.Now()
+
+	sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
 
 	_, err := db.Query(sql, model.Id, model.Name, model.Address)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(struct {
+	return ctx.Status(http.StatusOK).JSON(struct {
 		Id string `json:"id"`
 	}{
 		Id: model.Id,
