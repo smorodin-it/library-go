@@ -1,7 +1,6 @@
 package constants
 
 const (
-	LibraryTable     = "library"
-	LibraryIdField   = "libraryId"
-	LibrariesPerPage = 20
+	LibraryTable   = "library"
+	LibraryIdField = "libraryId"
 )

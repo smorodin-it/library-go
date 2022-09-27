@@ -9,14 +9,26 @@ import (
 	"library/src/forms"
 	"library/src/utils"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
 	var libraries []domains.Library
-	sql := fmt.Sprintf("select * from %s", constants.LibraryTable)
 
-	err := db.Select(&libraries, sql)
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil {
+		page = 1
+	}
+
+	perPage, err := strconv.Atoi(ctx.Query("perPage"))
+	if err != nil {
+		perPage = constants.PerPageDefault
+	}
+
+	sql := fmt.Sprintf("select * from %s order by name asc limit $1 offset $2", constants.LibraryTable)
+
+	err = db.Select(&libraries, sql, perPage, page-1+perPage)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -30,6 +42,7 @@ func RetrieveLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.LibraryTable)
 	err := db.Get(&library, sql, id)
+
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
