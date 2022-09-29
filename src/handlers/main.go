@@ -9,12 +9,10 @@ import (
 
 func ConnectRouter(app fiber.Router, db sqlx.DB) {
 	// Libraries routes
-	// List
 	app.Get("/libraries", func(ctx *fiber.Ctx) error {
 		return ListLibraries(ctx, &db)
 	})
 
-	// Retrieve
 	app.Get(fmt.Sprintf("/library/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
 		return RetrieveLibrary(ctx, &db)
 	})
@@ -37,5 +35,30 @@ func ConnectRouter(app fiber.Router, db sqlx.DB) {
 
 	app.Post("/libraries/batch", func(ctx *fiber.Ctx) error {
 		return CreateLibrariesInBatch(ctx, &db)
+	})
+
+	// Books routes
+	app.Get("/books", func(ctx *fiber.Ctx) error {
+		return ListBooks(ctx, &db)
+	})
+
+	app.Get(fmt.Sprintf("/book/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
+		return RetrieveBook(ctx, &db)
+	})
+
+	app.Post("/book", func(ctx *fiber.Ctx) error {
+		return CreateBook(ctx, &db)
+	})
+
+	app.Put(fmt.Sprintf("/book/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
+		return UpdateBook(ctx, &db)
+	})
+
+	app.Patch(fmt.Sprintf("/book/activate/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
+		return ToggleBookActive(ctx, &db, true)
+	})
+
+	app.Patch(fmt.Sprintf("/book/deactivate/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
+		return ToggleBookActive(ctx, &db, false)
 	})
 }
