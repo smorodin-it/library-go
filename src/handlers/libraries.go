@@ -28,7 +28,10 @@ func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	sql := fmt.Sprintf("select * from %s order by name asc limit $1 offset $2", constants.LibraryTable)
 
-	err = db.Select(&libraries, sql, perPage, page-1+perPage)
+	println(page, perPage)
+
+	err = db.Select(&libraries, sql, perPage, (page-1)*perPage)
+	//err = db.Select(&libraries, sql, 20, 0)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
