@@ -37,10 +37,10 @@ func ListBooks(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func RetrieveBook(ctx *fiber.Ctx, db *sqlx.DB) error {
-	id := ctx.Params(constants.LibraryIdField)
-	library := domains.Library{}
+	id := ctx.Params(constants.BookIdField)
+	library := domains.Book{}
 
-	sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.LibraryTable)
+	sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.BookTable)
 	err := db.Get(&library, sql, id)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func RetrieveBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func CreateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
-	form := new(forms.LibraryAddEditForm)
+	form := new(forms.BookAddEditForm)
 
 	if err := ctx.BodyParser(form); err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
@@ -62,16 +62,16 @@ func CreateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model := new(domains.Library)
+	model := new(domains.Book)
 
 	model.Id = utils.GenerateUUID()
-	model.Name = form.Name
-	model.Address = *form.Address
+	model.Title = form.Title
+	model.Author = form.Author
 	model.UpdatedAt = time.Now()
 
-	sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
+	sql := fmt.Sprintf("insert into %s (id, title, author) values ($1, $2, $3)", constants.BookTable)
 
-	_, err := db.Query(sql, model.Id, model.Name, model.Address)
+	_, err := db.Query(sql, model.Id, model.Title, model.Author)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -84,9 +84,9 @@ func CreateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func UpdateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
-	id := ctx.Params(constants.LibraryIdField)
+	id := ctx.Params(constants.BookIdField)
 
-	form := new(forms.LibraryAddEditForm)
+	form := new(forms.BookAddEditForm)
 
 	if err := ctx.BodyParser(form); err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
@@ -96,15 +96,15 @@ func UpdateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model := new(domains.Library)
+	model := new(domains.Book)
 
-	model.Name = form.Name
-	model.Address = *form.Address
+	model.Title = form.Title
+	model.Author = form.Author
 	model.UpdatedAt = time.Now()
 
-	sql := fmt.Sprintf("update %s set name=$1, address=$2, updated_at=$3 where id=$4", constants.LibraryTable)
+	sql := fmt.Sprintf("update %s set title=$1, author=$2, updated_at=$3 where id=$4", constants.BookTable)
 
-	_, err := db.Query(sql, model.Name, model.Address, model.UpdatedAt, id)
+	_, err := db.Query(sql, model.Title, model.Author, model.UpdatedAt, id)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
@@ -117,9 +117,9 @@ func UpdateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 }
 
 func ToggleBookActive(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
-	id := ctx.Params(constants.LibraryIdField)
+	id := ctx.Params(constants.BookIdField)
 
-	sql := fmt.Sprintf("update %s set active=$1, updated_at=$2 where id=$3", constants.LibraryTable)
+	sql := fmt.Sprintf("update %s set active=$1, updated_at=$2 where id=$3", constants.BookTable)
 	_, err := db.Query(sql, active, time.Now(), id)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
