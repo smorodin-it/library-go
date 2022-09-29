@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/helmet/v2"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"library/src/handlers"
@@ -39,6 +40,8 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	app.Use(helmet.New())
 
 	api := app.Group("/api")
 
