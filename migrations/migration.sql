@@ -18,3 +18,12 @@ create table book
     updated_at timestamp(0) default now()
 );
 
+create table books_in_libraries
+(
+    id         varchar(36) not null primary key,
+    library_id varchar(36) not null references library (id),
+    book_id    varchar(36) not null references book (id),
+    amount     integer     not null default 0,
+    created_at timestamp(0)         default now(),
+    updated_at timestamp(0)         default now()
+)
