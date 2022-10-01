@@ -37,6 +37,10 @@ func ConnectRouter(app fiber.Router, db sqlx.DB) {
 		return CreateLibrariesInBatch(ctx, &db)
 	})
 
+	app.Post("/library/add-book", func(ctx *fiber.Ctx) error {
+		return AddBookToLibrary(ctx, &db)
+	})
+
 	// Books routes
 	app.Get("/books", func(ctx *fiber.Ctx) error {
 		return ListBooks(ctx, &db)

@@ -76,11 +76,7 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(struct {
-		Id string `json:"id"`
-	}{
-		Id: model.Id,
-	})
+	return ctx.Status(http.StatusOK).JSON(utils.ResponseAdd{Id: model.Id})
 }
 
 func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
@@ -109,9 +105,7 @@ func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(struct {
-		Status bool `json:"status"`
-	}{
+	return ctx.Status(http.StatusOK).JSON(utils.ResponseStatus{
 		Status: true,
 	})
 }
@@ -125,11 +119,7 @@ func ToggleLibraryActive(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(struct {
-		Status bool `json:"status"`
-	}{
-		Status: true,
-	})
+	return ctx.Status(http.StatusOK).JSON(utils.ResponseStatus{Status: true})
 }
 
 func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
@@ -161,9 +151,34 @@ func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
 		}
 	}
 
-	return ctx.Status(http.StatusOK).JSON(struct {
-		Status bool `json:"status"`
-	}{
+	return ctx.Status(http.StatusOK).JSON(utils.ResponseStatus{
 		Status: true,
 	})
+}
+
+func AddBookToLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+	form := new(forms.BookToLibraryAddForm)
+
+	if err := ctx.BodyParser(form); err != nil {
+		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
+	}
+
+	if err := form.Validate(); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(err)
+	}
+
+	model := new(domains.BookInLibrary)
+
+	model.Id = utils.GenerateUUID()
+	model.LibraryId = form.LibraryId
+	model.BookId = form.BookId
+	model.AmountTotal = form.AmountTotal
+	model.AmountFact = form.AmountFact
+
+	sql := fmt.Sprintf("insert into %s (id, library_id, book_id, amount_total, amount_fact) values ($1, $2, $3, $4, $5)", constants.BooksInLibrariesTable)
+	if _, err := db.Query(sql, model.Id, model.LibraryId, model.BookId, model.AmountTotal, model.AmountFact); err != nil {
+		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return ctx.Status(http.StatusCreated).JSON(utils.ResponseAdd{Id: model.Id})
 }
