@@ -182,3 +182,24 @@ func AddBookToLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	return ctx.Status(http.StatusCreated).JSON(utils.ResponseAdd{Id: model.Id})
 }
+
+func ListAllBooksInLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+	id := ctx.Params(constants.LibraryIdField)
+
+	type BookWithAmount struct {
+		Id          string `json:"id"`
+		Title       string `json:"title"`
+		Author      string `json:"author"`
+		AmountTotal int    `json:"amountTotal" db:"amount_total"`
+	}
+
+	var books []BookWithAmount
+
+	//sql := fmt.Sprintf("select book.title book.author from book join ")
+
+	if err := db.Select(&books, "SELECT book.id, book.title, book.author, bil.amount_total from book join books_in_libraries bil on book.id = bil.book_id where library_id = $1", id); err != nil {
+		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
+	}
+
+	return ctx.Status(http.StatusOK).JSON(books)
+}

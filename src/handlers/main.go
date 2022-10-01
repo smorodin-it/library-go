@@ -41,6 +41,10 @@ func ConnectRouter(app fiber.Router, db sqlx.DB) {
 		return AddBookToLibrary(ctx, &db)
 	})
 
+	app.Get("/library/:libraryId/list-books", func(ctx *fiber.Ctx) error {
+		return ListAllBooksInLibrary(ctx, &db)
+	})
+
 	// Books routes
 	app.Get("/books", func(ctx *fiber.Ctx) error {
 		return ListBooks(ctx, &db)
