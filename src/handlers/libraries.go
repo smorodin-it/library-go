@@ -186,14 +186,7 @@ func AddBookToLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 func ListAllBooksInLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 	id := ctx.Params(constants.LibraryIdField)
 
-	type BookWithAmount struct {
-		Id          string `json:"id"`
-		Title       string `json:"title"`
-		Author      string `json:"author"`
-		AmountTotal int    `json:"amountTotal" db:"amount_total"`
-	}
-
-	var books []BookWithAmount
+	var books []forms.BookWithAmount
 
 	//sql := fmt.Sprintf("select book.title book.author from book join ")
 
