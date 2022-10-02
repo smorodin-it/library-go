@@ -48,10 +48,3 @@ func (f *BookToLibraryAddForm) Validate() []*utils.ErrorResponse {
 	}
 	return nil
 }
-
-type BookWithAmount struct {
-	Id          string `json:"id"`
-	Title       string `json:"title"`
-	Author      string `json:"author"`
-	AmountTotal int    `json:"amountTotal" db:"amount_total"`
-}
