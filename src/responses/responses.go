@@ -1,4 +1,4 @@
-package utils
+package responses
 
 type ErrorResponse struct {
 	FailedField string `json:"failedField"`

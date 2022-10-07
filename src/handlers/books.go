@@ -5,8 +5,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"library/src/constants"
-	"library/src/domains"
 	"library/src/forms"
+	"library/src/models"
 	"library/src/utils"
 	"net/http"
 	"strconv"
@@ -14,7 +14,7 @@ import (
 )
 
 func ListBooks(ctx *fiber.Ctx, db *sqlx.DB) error {
-	var books []domains.Book
+	var books []models.Book
 
 	page, err := strconv.Atoi(ctx.Query("page"))
 	if err != nil {
@@ -38,7 +38,7 @@ func ListBooks(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 func RetrieveBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 	id := ctx.Params(constants.BookIdField)
-	library := domains.Book{}
+	library := models.Book{}
 
 	sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.BookTable)
 	err := db.Get(&library, sql, id)
@@ -62,7 +62,7 @@ func CreateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model := new(domains.Book)
+	model := new(models.Book)
 
 	model.Id = utils.GenerateUUID()
 	model.Title = form.Title
@@ -96,7 +96,7 @@ func UpdateBook(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model := new(domains.Book)
+	model := new(models.Book)
 
 	model.Title = form.Title
 	model.Author = form.Author

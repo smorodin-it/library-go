@@ -3,7 +3,7 @@ package forms
 import (
 	"errors"
 	"github.com/go-playground/validator"
-	"library/src/utils"
+	"library/src/responses"
 	"unicode/utf8"
 )
 
@@ -32,13 +32,13 @@ type BookToLibraryAddForm struct {
 	AmountFact  int    `json:"amountFact" validate:"omitempty,numeric"`
 }
 
-func (f *BookToLibraryAddForm) Validate() []*utils.ErrorResponse {
+func (f *BookToLibraryAddForm) Validate() []*responses.ErrorResponse {
 	validate := validator.New()
-	var errs []*utils.ErrorResponse
+	var errs []*responses.ErrorResponse
 	err := validate.Struct(f)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			var element utils.ErrorResponse
+			var element responses.ErrorResponse
 			element.FailedField = err.StructNamespace()
 			element.Tag = err.Tag()
 			element.Value = err.Param()
@@ -47,11 +47,4 @@ func (f *BookToLibraryAddForm) Validate() []*utils.ErrorResponse {
 		return errs
 	}
 	return nil
-}
-
-type BookWithAmount struct {
-	Id          string `json:"id"`
-	Title       string `json:"title"`
-	Author      string `json:"author"`
-	AmountTotal int    `json:"amountTotal" db:"amount_total"`
 }

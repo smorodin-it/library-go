@@ -5,16 +5,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"library/src/constants"
-	"library/src/domains"
 	"library/src/forms"
+	"library/src/models"
+	"library/src/responses"
 	"library/src/utils"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
-	var libraries []domains.Library
+func ListLibrariesAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
+	var libraries []responses.LibraryAdminResponse
 
 	page, err := strconv.Atoi(ctx.Query("page"))
 	if err != nil {
@@ -36,9 +37,9 @@ func ListLibraries(ctx *fiber.Ctx, db *sqlx.DB) error {
 	return ctx.Status(http.StatusOK).JSON(libraries)
 }
 
-func RetrieveLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+func RetrieveLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 	id := ctx.Params(constants.LibraryIdField)
-	library := domains.Library{}
+	library := models.Library{}
 
 	sql := fmt.Sprintf("SELECT * from %s WHERE id=$1", constants.LibraryTable)
 	err := db.Get(&library, sql, id)
@@ -51,7 +52,7 @@ func RetrieveLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 }
 
-func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+func CreateLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 	form := new(forms.LibraryAddEditForm)
 
 	if err := ctx.BodyParser(form); err != nil {
@@ -62,7 +63,7 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model := new(domains.Library)
+	model := new(models.Library)
 
 	model.Id = utils.GenerateUUID()
 	model.Name = form.Name
@@ -76,10 +77,10 @@ func CreateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(utils.ResponseAdd{Id: model.Id})
+	return ctx.Status(http.StatusOK).JSON(responses.ResponseAdd{Id: model.Id})
 }
 
-func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+func UpdateLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 	id := ctx.Params(constants.LibraryIdField)
 
 	form := new(forms.LibraryAddEditForm)
@@ -92,7 +93,7 @@ func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 	}
 
-	model := new(domains.Library)
+	model := new(models.Library)
 
 	model.Name = form.Name
 	model.Address = *form.Address
@@ -105,12 +106,12 @@ func UpdateLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(utils.ResponseStatus{
+	return ctx.Status(http.StatusOK).JSON(responses.ResponseStatus{
 		Status: true,
 	})
 }
 
-func ToggleLibraryActive(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
+func ToggleLibraryActiveAdmin(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
 	id := ctx.Params(constants.LibraryIdField)
 
 	sql := fmt.Sprintf("update %s set active=$1, updated_at=$2 where id=$3", constants.LibraryTable)
@@ -119,11 +120,11 @@ func ToggleLibraryActive(ctx *fiber.Ctx, db *sqlx.DB, active bool) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusOK).JSON(utils.ResponseStatus{Status: true})
+	return ctx.Status(http.StatusOK).JSON(responses.ResponseStatus{Status: true})
 }
 
-func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
-	var libraries []domains.Library
+func CreateLibrariesInBatchAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
+	var libraries []models.Library
 
 	if err := ctx.BodyParser(&libraries); err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString(err.Error())
@@ -138,7 +139,7 @@ func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
 			return ctx.Status(http.StatusBadRequest).SendString(err.Error())
 		}
 
-		model := new(domains.Library)
+		model := new(models.Library)
 
 		model.Id = utils.GenerateUUID()
 		model.Name = form.Name
@@ -151,12 +152,12 @@ func CreateLibrariesInBatch(ctx *fiber.Ctx, db *sqlx.DB) error {
 		}
 	}
 
-	return ctx.Status(http.StatusOK).JSON(utils.ResponseStatus{
+	return ctx.Status(http.StatusOK).JSON(responses.ResponseStatus{
 		Status: true,
 	})
 }
 
-func AddBookToLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+func AddBookToLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 	form := new(forms.BookToLibraryAddForm)
 
 	if err := ctx.BodyParser(form); err != nil {
@@ -167,7 +168,7 @@ func AddBookToLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusBadRequest).JSON(err)
 	}
 
-	model := new(domains.BookInLibrary)
+	model := new(models.BookInLibrary)
 
 	model.Id = utils.GenerateUUID()
 	model.LibraryId = form.LibraryId
@@ -180,13 +181,13 @@ func AddBookToLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	return ctx.Status(http.StatusCreated).JSON(utils.ResponseAdd{Id: model.Id})
+	return ctx.Status(http.StatusCreated).JSON(responses.ResponseAdd{Id: model.Id})
 }
 
-func ListAllBooksInLibrary(ctx *fiber.Ctx, db *sqlx.DB) error {
+func ListAllBooksInLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 	id := ctx.Params(constants.LibraryIdField)
 
-	var books []forms.BookWithAmount
+	var books []responses.BookWithAmountResponse
 
 	//sql := fmt.Sprintf("select book.title book.author from book join ")
 

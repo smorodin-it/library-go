@@ -10,39 +10,39 @@ import (
 func ConnectRouter(app fiber.Router, db sqlx.DB) {
 	// Libraries routes
 	app.Get("/libraries", func(ctx *fiber.Ctx) error {
-		return ListLibraries(ctx, &db)
+		return ListLibrariesAdmin(ctx, &db)
 	})
 
 	app.Get(fmt.Sprintf("/library/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
-		return RetrieveLibrary(ctx, &db)
+		return RetrieveLibraryAdmin(ctx, &db)
 	})
 
 	app.Post("/library", func(ctx *fiber.Ctx) error {
-		return CreateLibrary(ctx, &db)
+		return CreateLibraryAdmin(ctx, &db)
 	})
 
 	app.Put(fmt.Sprintf("/library/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
-		return UpdateLibrary(ctx, &db)
+		return UpdateLibraryAdmin(ctx, &db)
 	})
 
 	app.Patch(fmt.Sprintf("/library/activate/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
-		return ToggleLibraryActive(ctx, &db, true)
+		return ToggleLibraryActiveAdmin(ctx, &db, true)
 	})
 
 	app.Patch(fmt.Sprintf("/library/deactivate/:%s", constants.LibraryIdField), func(ctx *fiber.Ctx) error {
-		return ToggleLibraryActive(ctx, &db, false)
+		return ToggleLibraryActiveAdmin(ctx, &db, false)
 	})
 
 	app.Post("/libraries/batch", func(ctx *fiber.Ctx) error {
-		return CreateLibrariesInBatch(ctx, &db)
+		return CreateLibrariesInBatchAdmin(ctx, &db)
 	})
 
 	app.Post("/library/add-book", func(ctx *fiber.Ctx) error {
-		return AddBookToLibrary(ctx, &db)
+		return AddBookToLibraryAdmin(ctx, &db)
 	})
 
 	app.Get("/library/:libraryId/list-books", func(ctx *fiber.Ctx) error {
-		return ListAllBooksInLibrary(ctx, &db)
+		return ListAllBooksInLibraryAdmin(ctx, &db)
 	})
 
 	// Books routes
