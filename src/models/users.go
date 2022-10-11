@@ -18,20 +18,28 @@ type User struct {
 	UpdatedAt    time.Time `db:"updated_at"`
 }
 
-func (m *User) PrepareData(f *forms.UserSignUpForm, flow int) (u *User, e error) {
+func (m *User) PrepareData(f *forms.UserSignUpForm, flow int) {
 	if flow == constants.ModelCreateFlow {
 		m.Id = utils.GenerateUUID()
 		m.CreatedAt = time.Now()
 	}
 	m.Email = f.Email
-	var err error
-	m.PasswordHash, err = bcrypt.GenerateFromPassword([]byte(f.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	m.UpdatedAt = time.Now()
 
-	return m, nil
+	m.UpdatedAt = time.Now()
+}
+
+func (m *User) HashPassword(password string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	m.PasswordHash = hash
+	return nil
+}
+
+func (m *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword(m.PasswordHash, []byte(password))
+	return err != nil
 }
 
 type Profile struct {
@@ -46,7 +54,7 @@ type Profile struct {
 	UpdatedAt  time.Time `db:"updated_at"`
 }
 
-func (m *Profile) PrepareData(f *forms.ProfileAddEditForm, flow int) Profile {
+func (m *Profile) PrepareData(f *forms.ProfileAddEditForm, flow int) {
 	if flow == constants.ModelCreateFlow {
 		m.Id = utils.GenerateUUID()
 		m.CreatedAt = time.Now()
@@ -58,6 +66,4 @@ func (m *Profile) PrepareData(f *forms.ProfileAddEditForm, flow int) Profile {
 	m.Address = f.Address
 	m.UserId = f.UserId
 	m.UpdatedAt = time.Now()
-
-	return *m
 }

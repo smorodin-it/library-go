@@ -17,7 +17,7 @@ type Book struct {
 	UpdatedAt time.Time `db:"updatedAt"`
 }
 
-func (m *Book) PrepareData(f *forms.BookAddEditForm, flow int) Book {
+func (m *Book) PrepareData(f *forms.BookAddEditForm, flow int) {
 	if flow == constants.ModelCreateFlow {
 		m.Id = utils.GenerateUUID()
 		m.CreatedAt = time.Now()
@@ -25,6 +25,4 @@ func (m *Book) PrepareData(f *forms.BookAddEditForm, flow int) Book {
 	m.Title = f.Title
 	m.Author = f.Author
 	m.UpdatedAt = time.Now()
-
-	return *m
 }

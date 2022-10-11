@@ -16,7 +16,7 @@ type Library struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func (m *Library) PrepareData(f forms.LibraryAddEditForm, flow int) Library {
+func (m *Library) PrepareData(f forms.LibraryAddEditForm, flow int) {
 	if flow == constants.ModelCreateFlow {
 		m.Id = utils.GenerateUUID()
 		m.CreatedAt = time.Now()
@@ -24,8 +24,6 @@ func (m *Library) PrepareData(f forms.LibraryAddEditForm, flow int) Library {
 	m.Name = f.Name
 	m.Address = *f.Address
 	m.UpdatedAt = time.Now()
-
-	return *m
 }
 
 type BookInLibrary struct {
@@ -38,7 +36,7 @@ type BookInLibrary struct {
 	UpdatedAt   time.Time `db:"updated_at"`
 }
 
-func (m *BookInLibrary) PrepareData(f *forms.BookToLibraryAddForm, flow int) BookInLibrary {
+func (m *BookInLibrary) PrepareData(f *forms.BookToLibraryAddForm, flow int) {
 	if flow == constants.ModelCreateFlow {
 		m.Id = utils.GenerateUUID()
 		m.CreatedAt = time.Now()
@@ -48,6 +46,4 @@ func (m *BookInLibrary) PrepareData(f *forms.BookToLibraryAddForm, flow int) Boo
 	m.AmountTotal = f.AmountTotal
 	m.AmountFact = f.AmountFact
 	m.UpdatedAt = time.Now()
-
-	return *m
 }
