@@ -1,12 +1,12 @@
 create table profile
 (
-    id         varchar(36)  not null primary key,
-    first_name varchar(255) not null,
-    last_name  varchar(255) not null,
-    patronymic varchar(255),
-    phone      varchar(11)  not null,
-    address    text         not null,
-    user_id    varchar(36)  not null references "user" (id) on delete restrict,
+    id         varchar(36)   not null primary key,
+    first_name varchar(255)  not null,
+    last_name  varchar(255)  not null,
+    patronymic varchar(255) default NULL::varchar,
+    phone      varchar(11)   not null,
+    address    varchar(2000) not null,
+    user_id    varchar(36)   not null references "user" (id) on delete restrict,
     created_at timestamp(0) default now(),
     updated_at timestamp(0) default now()
 );
