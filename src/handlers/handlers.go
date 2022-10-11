@@ -3,11 +3,22 @@ package handlers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
+	//"github.com/golang-jwt/jwt/v4"
 	"github.com/jmoiron/sqlx"
 	"library/src/constants"
 )
 
 func ConnectRouter(app fiber.Router, db sqlx.DB) {
+
+	/*
+		Auth Routes
+	*/
+
+	/*
+		Public Routes
+	*/
+
 	// Libraries routes
 	app.Get("/libraries", func(ctx *fiber.Ctx) error {
 		return ListLibrariesAdmin(ctx, &db)
@@ -69,4 +80,12 @@ func ConnectRouter(app fiber.Router, db sqlx.DB) {
 	app.Patch(fmt.Sprintf("/book/deactivate/:%s", constants.BookIdField), func(ctx *fiber.Ctx) error {
 		return ToggleBookActive(ctx, &db, false)
 	})
+
+	/*
+		Private Routes
+	*/
+	app.Use(jwtware.New(jwtware.Config{
+		// TODO: Move to env
+		SigningKey: []byte("SOME_VERY_SECRET_KEY"),
+	}))
 }
