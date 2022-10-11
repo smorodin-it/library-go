@@ -17,4 +17,5 @@ type ProfileAddEditForm struct {
 	Patronymic *string `json:"patronymic" validate:"omitempty,gte=2,lte=255"`
 	Phone      string  `json:"phone" validate:"required,len=11"`
 	Address    string  `json:"address" validate:"required"`
+	UserId     string  `json:"userId" validate:"required,uuid4"`
 }

@@ -65,7 +65,7 @@ func CreateLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	model := new(models.Library)
 
-	model.GetData(*form, constants.ModelCreateFlow)
+	model.PrepareData(*form, constants.ModelCreateFlow)
 
 	sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
 
