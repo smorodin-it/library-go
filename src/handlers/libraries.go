@@ -8,7 +8,6 @@ import (
 	"library/src/forms"
 	"library/src/models"
 	"library/src/responses"
-	"library/src/utils"
 	"net/http"
 	"strconv"
 	"time"
@@ -92,9 +91,7 @@ func UpdateLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	model := new(models.Library)
 
-	model.Name = form.Name
-	model.Address = *form.Address
-	model.UpdatedAt = time.Now()
+	model.PrepareData(*form, constants.ModelEditFlow)
 
 	sql := fmt.Sprintf("update %s set name=$1, address=$2, updated_at=$3 where id=$4", constants.LibraryTable)
 
@@ -138,9 +135,7 @@ func CreateLibrariesInBatchAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 		model := new(models.Library)
 
-		model.Id = utils.GenerateUUID()
-		model.Name = form.Name
-		model.Address = *form.Address
+		model.PrepareData(form, constants.ModelCreateFlow)
 
 		sql := fmt.Sprintf("insert into %s (id, name, address) values ($1, $2, $3)", constants.LibraryTable)
 		_, err := db.Query(sql, model.Id, model.Name, model.Address)
@@ -167,11 +162,7 @@ func AddBookToLibraryAdmin(ctx *fiber.Ctx, db *sqlx.DB) error {
 
 	model := new(models.BookInLibrary)
 
-	model.Id = utils.GenerateUUID()
-	model.LibraryId = form.LibraryId
-	model.BookId = form.BookId
-	model.AmountTotal = form.AmountTotal
-	model.AmountFact = form.AmountFact
+	model.PrepareData(form, constants.ModelCreateFlow)
 
 	sql := fmt.Sprintf("insert into %s (id, library_id, book_id, amount_total, amount_fact) values ($1, $2, $3, $4, $5)", constants.BooksInLibrariesTable)
 	if _, err := db.Query(sql, model.Id, model.LibraryId, model.BookId, model.AmountTotal, model.AmountFact); err != nil {
